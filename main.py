@@ -2,7 +2,7 @@ import pygame
 import time
 
 from constants import *
-from objects import Rect, MovingRect, Player
+from objects import *
 from environment import Environment
 
 def main():
@@ -11,9 +11,8 @@ def main():
     display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
     env = Environment()
-    env.add(Rect(14.3, 40.6, 5.7, 1.3))
-    env.add(MovingRect(100, 38, 10, 10, -10, 0))
-    env.add(Player(0, 0, 10, 10, 10))
+    env.add(Player(0, 0, 5, 5, 80))
+    env.add(Food(10, 5, 5, 5))
 
     start_time = time.time()
     last_time = start_time
@@ -36,7 +35,9 @@ def main():
         last_time = cur_time
 
         pygame.display.update()
-        time.sleep(1.0 / fps)
+
+        if fps:
+            time.sleep(1.0 / fps)
 
 
 if __name__ == '__main__':

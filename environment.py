@@ -3,9 +3,10 @@ class Environment:
     def __init__(self):
         self.objects = []
         self.controllers = {}
+        self.remove_items = []
 
     def add(self, item):
-        if type(item) == 'list':
+        if isinstance(item, list):
             for i in item:
                 add(i)
         else:
@@ -13,9 +14,16 @@ class Environment:
             item.put_in(self)
 
     def remove(self, item):
-        if type(item) == 'list':
+        if isinstance(item, list):
             for i in item:
                 remove(i)
+        else:
+            self.remove_items.append(item)
+
+    def __real_remove(self, item):
+        if isinstance(item, list):
+            for i in item:
+                self.__real_remove(i)
         else:
             self.objects.remove(item)
 
@@ -33,6 +41,8 @@ class Environment:
                     obj.collides(self.objects[j])
                     self.objects[j].collides(obj)
             obj.update(display, t, dt, render)
+        self.__real_remove(self.remove_items)
+        self.remove_items = []
 
     def handle(self, event):
         if event.type in self.controllers:

@@ -1,5 +1,6 @@
 import pygame
-from util import transform_x, transform_y
+
+from util import transform_x, transform_y, squeeze
 from controllers import KeyController
 
 class GraphicsObject:
@@ -23,7 +24,7 @@ class GraphicsObject:
         self.env = env
 
 class Rect(GraphicsObject):
-    def __init__(self, x, y, w, h, color = (0, 0, 0)):
+    def __init__(self, x, y, w, h, color=(0, 0, 0)):
         super().__init__()
         self.x = x
         self.y = y
@@ -53,7 +54,48 @@ class MovingRect(Rect):
         if render:
             self.draw(display)
 
-class Player(MovingRect):
+
+class Food(Rect):
+
+    _func = squeeze(-50, 50)
+
+    def __init__(self, x, y, w, h):
+        super().__init__(x, y, w, h, color=(0, 255, 0))
+
+    def collides(self, obj):
+        if isinstance(obj, Consumer):
+            obj.consume(self.get_value())
+            self.env.remove(self)
+
+    def get_value(self):
+        return Food._func(self.w * self.h / 10)
+
+class Consumer(MovingRect):
+    def __init__(self, x, y, w, h, v_x, v_y, color=(0,0,0)):
+        super().__init__(x, y, w, h, v_x, v_y, color=color)
+        self.energy = 100
+
+    def consume(self, num):
+        self.energy += num
+
+    def lose(self, num):
+        self.energy -= num
+
+    def total_speed(self):
+        return (self.v_x ** 2 + self.v_y ** 2) ** 0.5
+
+    def total_area(self):
+        return self.w * self.h
+
+    def update(self, display, t, dt, render):
+        super().update(display, t, dt, render)
+        self.lose(self.total_speed() * self.total_area() * dt / 250)
+        print(self.energy)
+        if self.energy <= 0:
+            self.env.remove(self)
+        
+
+class Player(Consumer):
     def __init__(self, x, y, w, h, v, color=(0,0,0)):
         self.v = v
         super().__init__(x, y, w, h, 0, 0, color=color)
@@ -72,11 +114,3 @@ class Player(MovingRect):
     def put_in(self, env):
         super().put_in(env)
         env.register_controller(self.controller)
-
-
-class Food(Rect):
-    def __init__(self, x, y, w, h):
-        super().__init__(x, y, w, h, color=(0, 255, 0))
-
-    def collide(self, obj):
-        super.env.remove(self)
