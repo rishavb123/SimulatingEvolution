@@ -1,12 +1,14 @@
 import pygame
 from util import transform_x, transform_y
+from controllers import KeyController
 
 class GraphicsObject:
     def __init__(self):
-        pass
+        self.env = None
 
-    def update(self, display, t, dt):
-        self.draw(display)
+    def update(self, display, t, dt, render):
+        if render:
+            self.draw(display)
 
     def hitbox(self):
         return None
@@ -16,6 +18,9 @@ class GraphicsObject:
 
     def draw(self, display):
         pass
+
+    def put_in(self, env):
+        self.env = env
 
 class Rect(GraphicsObject):
     def __init__(self, x, y, w, h, color = (0, 0, 0)):
@@ -42,7 +47,36 @@ class MovingRect(Rect):
         self.v_x = v_x
         self.v_y = v_y
 
-    def update(self, display, t, dt):
+    def update(self, display, t, dt, render):
         self.x += self.v_x * dt
         self.y += self.v_y * dt
-        self.draw(display)
+        if render:
+            self.draw(display)
+
+class Player(MovingRect):
+    def __init__(self, x, y, w, h, v, color=(0,0,0)):
+        self.v = v
+        super().__init__(x, y, w, h, 0, 0, color=color)
+        mappings = {
+            pygame.K_LEFT: lambda: self.set_v(-self.v, 0),
+            pygame.K_RIGHT: lambda: self.set_v(self.v, 0),
+            pygame.K_UP: lambda: self.set_v(0, -self.v),
+            pygame.K_DOWN: lambda: self.set_v(0, self.v)
+        }
+        self.controller = KeyController(mappings)
+
+    def set_v(self, v_x, v_y):
+        self.v_x = v_x
+        self.v_y = v_y
+
+    def put_in(self, env):
+        super().put_in(env)
+        env.register_controller(self.controller)
+
+
+class Food(Rect):
+    def __init__(self, x, y, w, h):
+        super().__init__(x, y, w, h, color=(0, 255, 0))
+
+    def collide(self, obj):
+        super.env.remove(self)
