@@ -1,3 +1,5 @@
+from shapes import collides
+
 class Environment:
 
     def __init__(self):
@@ -8,7 +10,7 @@ class Environment:
     def add(self, item):
         if isinstance(item, list):
             for i in item:
-                add(i)
+                self.add(i)
         else:
             self.objects.append(item)
             item.put_in(self)
@@ -25,7 +27,11 @@ class Environment:
             for i in item:
                 self.__real_remove(i)
         else:
-            self.objects.remove(item)
+            if item in self.objects:
+                self.objects.remove(item)
+
+    def get_all(self, obj_type):
+        return list(filter(lambda obj: isinstance(obj, obj_type), self.objects)) + list(filter(lambda obj: isinstance(obj, obj_type), self.controllers))
 
     def register_controller(self, controller):
         event_type = controller.event_type
@@ -37,9 +43,9 @@ class Environment:
         for i in range(len(self.objects)):
             obj = self.objects[i]
             for j in range(i + 1, len(self.objects)):
-                if obj.hitbox() and obj.hitbox().colliderect(self.objects[j].hitbox()):
-                    obj.collides(self.objects[j])
-                    self.objects[j].collides(obj)
+                if obj.hitbox() and self.objects[j].hitbox() and collides(obj.hitbox(), self.objects[j].hitbox()):
+                    obj.on_collision(self.objects[j])
+                    self.objects[j].on_collision(obj)
             obj.update(display, t, dt, render)
         self.__real_remove(self.remove_items)
         self.remove_items = []
