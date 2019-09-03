@@ -3,6 +3,7 @@ import time
 
 from constants import *
 from objects import *
+from intervals import *
 from environment import Environment
 
 def main():
@@ -11,8 +12,9 @@ def main():
     display = pygame.display.set_mode((width, height), pygame.RESIZABLE)
 
     env = Environment()
-    env.add(Player(0, 0, 5, 5, 80))
-    env.add(Food(10, 5, 5, 5))
+    env.add(Player(0, 0, 5, 5, 40))
+
+    FoodSpawner(lambda: 3, lambda: 3, 1, env).start()
 
     start_time = time.time()
     last_time = start_time
