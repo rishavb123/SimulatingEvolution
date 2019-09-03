@@ -22,3 +22,17 @@ def sigmoid(x):
 
 def squeeze(minimum, maximum):
     return lambda x: minimum + sigmoid(x / 3) * (maximum - minimum)
+
+def argmax(l):
+    return max(zip(l, range(len(l))))[1] if l else -1
+
+def argmin(l):
+    return min(zip(l, range(len(l))))[1] if l else -1
+
+def clamp(value, minimum, maximum):
+    if value < minimum:
+        return minimum
+    elif value > maximum:
+        return maximum
+    else:
+        return value

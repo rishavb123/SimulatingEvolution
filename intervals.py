@@ -1,7 +1,7 @@
 import random
 
 from util import set_interval
-from objects import Food
+from objects import RectFood, CircleFood
 
 class Interval:
 
@@ -30,12 +30,18 @@ class Spawner(Interval):
 
 class FoodSpawner(Spawner):
     
-    def __init__(self, w_func, h_func, s, env):
-        super().__init__(s=1, env=env)
+    def __init__(self, w_func, h_func, r_func, circ_prob, s, env):
+        super().__init__(s=s, env=env)
         self.w_func = w_func
         self.h_func = h_func
+        self.r_func = r_func
+        self.circ_prob = circ_prob
 
     def spawn_func(self):
-        w = self.w_func()
-        h = self.h_func()
-        return Food(random.randrange(0, 100 - w), random.randrange(0, 100 - h), w, h)
+        if random.random() < self.circ_prob:
+            r = self.r_func()
+            return CircleFood(random.randrange(r, 100 - r), random.randrange(r, 100 - r), r)
+        else:
+            w = self.w_func()
+            h = self.h_func()
+            return RectFood(random.randrange(0, 100 - w), random.randrange(0, 100 - h), w, h)
